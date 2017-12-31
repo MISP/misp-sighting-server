@@ -1,0 +1,5 @@
+[server]
+ardb_port = 16379
+ardb_socket = /tmp/ardb.sock
+api_key = afdef83f9cc7c87b801c36e4af632ef06af2f2ef
+default_source = unknown
