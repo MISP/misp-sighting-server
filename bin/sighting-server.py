@@ -38,14 +38,20 @@ api_key = cfg.get('server', 'api_key')
 default_source = cfg.get('server', 'default_source')
 
 version = '0.1'
-r = redis.StrictRedis(unix_socket_path=ardb_socket, db=0, decode_responses=True,
+r = [
+    redis.StrictRedis(unix_socket_path=ardb_socket, db=0, decode_responses=True,
+                      charset='utf-8'),
+    redis.StrictRedis(unix_socket_path=ardb_socket, db=1, decode_responses=True,
                       charset='utf-8')
+]
 
+    
 def Init():
-    r.set('misp-sighting-server:version', version)
     d = datetime.datetime.utcnow()
     d_with_timezone = d.replace(tzinfo=pytz.UTC)
-    r.set('misp-sighting-server:startup', d_with_timezone.isoformat())
+    for i in range(0, 1):
+        r[i].set('misp-sighting-server:version', version)
+        r[i].set('misp-sighting-server:startup', d_with_timezone.isoformat())
 
 def TestBackend(version=version):
     version = r.get('misp-sighting-server:version')
@@ -73,7 +79,10 @@ class AddSighting(Resource):
             source = default_source
         else:
             source = request.form['source']
-        if r.hset(request.form['value'], when,
+        request_type = 0
+        if request.form.get('type'):
+            request_type = int(request.form['type'])
+        if r[request_type].hset(request.form['value'], when,
                   source):
             return True
         else:
@@ -83,7 +92,10 @@ class GetSighting(Resource):
     def get(self):
         if request.form['value'] is None:
             return False
-        return r.hgetall(request.form['value'])
+        request_type = 0
+        if request.form.get('type'):
+            request_type = int(request.form['type'])
+        return r[request_type].hgetall(request.form['value'])
 
 api.add_resource(GetStatus, '/')
 api.add_resource(AddSighting, '/add')
