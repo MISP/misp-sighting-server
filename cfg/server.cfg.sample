@@ -4,3 +4,4 @@ ardb_socket = /tmp/ardb.sock
 api_key = afdef83f9cc7c87b801c36e4af632ef06af2f2ef
 default_source = unknown
 default_org_uuid = 2232e011-1b2d-4ae0-9792-2789d77d2b07
+journal = 1

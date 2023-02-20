@@ -3,7 +3,7 @@
 #
 #    ReST server for misp sighting server
 #
-#    Copyright (C) 2017-2022 Alexandre Dulaunoy
+#    Copyright (C) 2017-2023 Alexandre Dulaunoy
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ import pytz
 import time
 import configparser
 import uuid
+import time
 
 app = Flask(__name__)
 api = Api(app)
@@ -37,6 +38,7 @@ ardb_port = cfg.get('server', 'ardb_port')
 api_key = cfg.get('server', 'api_key')
 default_source = cfg.get('server', 'default_source')
 default_org_uuid = cfg.get('server', 'default_org_uuid')
+journal = cfg.get('server', 'journal')
 version = '0.2'
 r = redis.StrictRedis(port=ardb_port, db=0, decode_responses=True, charset='utf-8')
 
@@ -103,6 +105,12 @@ class AddSighting(Resource):
             request_type = int(request.form['type'])
         payload = f'{source}:{request_type}:{org_uuid}'
         if r.hset(request.form['value'], when, payload):
+            if journal:
+                now = datetime.datetime.utcnow()
+                year_month_day_format = '%Y%m%d'
+                log_day = now.strftime(year_month_day_format)
+                ns = time.time_ns()
+                r.zadd(log_day, {request.form['value']: ns})
             r.incr('misp-sighting-server:set')
             return True
         else:
