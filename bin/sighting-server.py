@@ -33,19 +33,16 @@ cfg = configparser.ConfigParser()
 cfg.read('../cfg/server.cfg')
 
 ardb_port = cfg.get('server', 'ardb_port')
-ardb_socket = cfg.get('server', 'ardb_socket')
 api_key = cfg.get('server', 'api_key')
 default_source = cfg.get('server', 'default_source')
 
 version = '0.1'
 r = [
-    redis.StrictRedis(unix_socket_path=ardb_socket, db=0, decode_responses=True,
-                      charset='utf-8'),
-    redis.StrictRedis(unix_socket_path=ardb_socket, db=1, decode_responses=True,
+    redis.StrictRedis(port=ardb_port, db=0, decode_responses=True,
                       charset='utf-8')
 ]
 
-    
+
 def Init():
     d = datetime.datetime.utcnow()
     d_with_timezone = d.replace(tzinfo=pytz.UTC)

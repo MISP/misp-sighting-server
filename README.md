@@ -20,8 +20,8 @@ API on the long-term.
 ~~~
 git submodule init
 git submodule update
-cd back-end/ardb
-storage_engine=rocksdb make
+cd back-end/kvrocks
+./x.py build
 cd ../..
 pip3 install -r REQUIREMENTS
 ~~~
@@ -31,13 +31,16 @@ pip3 install -r REQUIREMENTS
 ## Starting the back-end
 
 ~~~
-cd back-end/ardb
-./src/ardb-server ardb.conf
+cd back-end/kvrocks
+./build/kvrocks -c kvrocks.conf&
 ~~~
 
 ## Starting the ReST API server
 
 ~~~
+cd cfg
+cp server.cfg.sample server.cfg
+cd ..
 cd ./bin/
 python3 sighting-server.py
 ~~~
