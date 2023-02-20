@@ -56,18 +56,24 @@ def Init():
     d_with_timezone = d.replace(tzinfo=pytz.UTC)
     r.set('misp-sighting-server:version', version)
     r.set('misp-sighting-server:startup', d_with_timezone.isoformat())
+    r.set('misp-sighting-server:get', 0)
+    r.set('misp-sighting-server:set', 0)
 
+Init()
 
 def TestBackend(version=version):
     version = r.get('misp-sighting-server:version')
     startup = r.get('misp-sighting-server:startup')
-    return (version, startup)
+    get = r.get('misp-sighting-server:get')
+    set_stat = r.get('misp-sighting-server:set')
+
+    return (version, startup, get, set_stat)
 
 
 class GetStatus(Resource):
     def get(self):
         status = TestBackend()
-        return {'version': status[0], 'startup': status[1]}
+        return {'version': status[0], 'startup': status[1], 'get': status[2], 'set': status[3]}
 
 
 class AddSighting(Resource):
@@ -97,6 +103,7 @@ class AddSighting(Resource):
             request_type = int(request.form['type'])
         payload = f'{source}:{request_type}:{org_uuid}'
         if r.hset(request.form['value'], when, payload):
+            r.incr('misp-sighting-server:set')
             return True
         else:
             return False
@@ -109,6 +116,7 @@ class GetSighting(Resource):
         request_type = 0
         if request.form.get('type'):
             request_type = int(request.form['type'])
+        r.incr('misp-sighting-server:get')
         return r.hgetall(request.form['value'])
 
 
