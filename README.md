@@ -50,50 +50,36 @@ python3 sighting-server.py
 
 ## Add a sighting
 
+|field|description|
+|:---|:---|
+|`value`|Value of the sighting or UUID reference to the sighting|
+|`type`|Type of sighting (default is `0`)|
+|`org_uuid`|UUID of the organisation recording the sighting|
+
 ~~~
-curl --header 'X-API-Key: afdef83f9cc7c87b801c36e4af632ef06af2f2ef' -X PUT  http://127.0.0.1:5000/add -d "value=127.0.0.1"  -d "source=honeypot"
+curl --header 'X-API-Key: afdef83f9cc7c87b801c36e4af632ef06af2f2ef' -X PUT  http://127.0.0.1:5000/add -d "value=127.0.0.1&type=0&org_uuid=0acdaad8-b305-482f-a904-78330640636b"  -d "source=honeypot"
 ~~~
 
-## Get a sighting
+## Get the sighting of a value
 
 ~~~
 curl -X GET http://127.0.0.1:5000/get -d "value=127.0.0.1"
 {
-    "1514737886": "honeypot",
-    "1514736878": "unknown",
-    "1514737898": "honeypot",
-    "1514737866": "honeypot",
-    "1514750757": "honeypot",
-    "1514736844": "unknown",
-    "1514737114": "blackhole",
-    "1514750755": "honeypot",
-    "1514750799": "honeypot",
-    "1514736877": "unknown",
-    "1514736840": "honeypot",
-    "1514737641": "honeypot",
-    "1514750760": "honeypot",
-    "1514737028": "unknown",
-    "1514736904": "unknown",
-    "1514737110": "blackhole",
-    "1514737219": "honeypot",
-    "1514737900": "honeypot",
-    "1514737901": "honeypot",
-    "1514737216": "honeypot",
-    "1514737102": "honeypot",
-    "1514736900": "honeypot",
-    "1514735898": "honeypot",
-    "1514736727": "honeypot",
-    "1514737113": "blackhole",
-    "1514737841": "honeypot",
-    "1514737111": "blackhole",
-    "1514750756": "honeypot",
-    "1514736848": "honeypot",
-    "1514737709": "honeypot",
-    "1514737115": "blackhole",
-    "1514737680": "honeypot",
-    "1514735899": "honeypot",
-    "1514737117": "blackhole",
-    "1514737109": "blackhole"
+    "1676925347": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925348": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925349": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925350": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925351": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925352": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925353": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925354": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925355": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925356": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925358": "honeypot:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925618": "blackhole:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925619": "blackhole:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925623": "siem:0:0acdaad8-b305-482f-a904-78330640636b",
+    "1676925627": "edr_234:0:0acdaad8-b305-482f-a904-78330640636b"
 }
 ~~~
 

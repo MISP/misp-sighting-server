@@ -3,7 +3,7 @@
 #
 #    ReST server for misp sighting server
 #
-#    Copyright (C) 2017 Alexandre Dulaunoy
+#    Copyright (C) 2017-2022 Alexandre Dulaunoy
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ import datetime
 import pytz
 import time
 import configparser
+import uuid
 
 app = Flask(__name__)
 api = Api(app)
@@ -35,20 +36,27 @@ cfg.read('../cfg/server.cfg')
 ardb_port = cfg.get('server', 'ardb_port')
 api_key = cfg.get('server', 'api_key')
 default_source = cfg.get('server', 'default_source')
+default_org_uuid = cfg.get('server', 'default_org_uuid')
+version = '0.2'
+r = redis.StrictRedis(port=ardb_port, db=0, decode_responses=True, charset='utf-8')
 
-version = '0.1'
-r = [
-    redis.StrictRedis(port=ardb_port, db=0, decode_responses=True,
-                      charset='utf-8')
-]
+
+def _validate_uuid(value=None):
+    if uuid is None:
+        return False
+    try:
+        _val = uuid.UUID(value)
+    except ValueError:
+        return False
+    return True
 
 
 def Init():
     d = datetime.datetime.utcnow()
     d_with_timezone = d.replace(tzinfo=pytz.UTC)
-    for i in range(0, 1):
-        r[i].set('misp-sighting-server:version', version)
-        r[i].set('misp-sighting-server:startup', d_with_timezone.isoformat())
+    r.set('misp-sighting-server:version', version)
+    r.set('misp-sighting-server:startup', d_with_timezone.isoformat())
+
 
 def TestBackend(version=version):
     version = r.get('misp-sighting-server:version')
@@ -61,12 +69,13 @@ class GetStatus(Resource):
         status = TestBackend()
         return {'version': status[0], 'startup': status[1]}
 
+
 class AddSighting(Resource):
     def put(self):
         if request.form['value'] is None:
             return False
         if not (request.headers.get('X-Api-Key') == api_key):
-            print (request.headers)
+            print(request.headers)
             return False
         if not request.form.get('epoch'):
             when = int(time.time())
@@ -76,14 +85,22 @@ class AddSighting(Resource):
             source = default_source
         else:
             source = request.form['source']
+        if not request.form.get('org_uuid'):
+            org_uuid = default_org_uuid
+        else:
+            org_uuid = request.form['org_uuid']
+        if not _validate_uuid(org_uuid):
+            return {'error': 'org_uuid is not a valid UUID'}
+
         request_type = 0
         if request.form.get('type'):
             request_type = int(request.form['type'])
-        if r[request_type].hset(request.form['value'], when,
-                  source):
+        payload = f'{source}:{request_type}:{org_uuid}'
+        if r.hset(request.form['value'], when, payload):
             return True
         else:
             return False
+
 
 class GetSighting(Resource):
     def get(self):
@@ -92,7 +109,8 @@ class GetSighting(Resource):
         request_type = 0
         if request.form.get('type'):
             request_type = int(request.form['type'])
-        return r[request_type].hgetall(request.form['value'])
+        return r.hgetall(request.form['value'])
+
 
 api.add_resource(GetStatus, '/')
 api.add_resource(AddSighting, '/add')
