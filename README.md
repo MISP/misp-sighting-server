@@ -11,8 +11,9 @@ space efficient way.
 
 ## Back-end database
 
-MISP sighting server rely on a [ardb](https://github.com/yinqiwen/ardb) using [RocksDB](https://github.com/facebook/rocksdb) at the current stage. The back-end database might
-change following the evolution of the requirements or capabilities but the objective is to keep a compatibility layer to ensure use of the sighting database have the same
+MISP sighting server rely on [kvrocks](https://github.com/apache/incubator-kvrocks/) using [RocksDB](https://github.com/facebook/rocksdb) at the current stage. 
+
+The back-end database might change following the evolution of the requirements or capabilities but the objective is to keep a compatibility layer to ensure use of the sighting database have the same
 API on the long-term.
 
 # Install
