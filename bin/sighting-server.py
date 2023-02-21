@@ -61,7 +61,9 @@ def Init():
     r.set('misp-sighting-server:get', 0)
     r.set('misp-sighting-server:set', 0)
 
+
 Init()
+
 
 def TestBackend(version=version):
     version = r.get('misp-sighting-server:version')
@@ -72,10 +74,33 @@ def TestBackend(version=version):
     return (version, startup, get, set_stat)
 
 
+def UpdateJournal(value=None):
+    if value is None:
+        return False
+    now = datetime.datetime.utcnow()
+    year_month_day_format = '%Y%m%d'
+    log_day = now.strftime(year_month_day_format)
+    ns = time.time_ns()
+    r.zadd(log_day, {value: ns})
+    return True
+
+
+def UpdatePayload(value=None, when=None, new_payload=None):
+    if when is None or new_payload is None or value is None:
+        return False
+    ret = r.hset(value, when, new_payload)
+    return True
+
+
 class GetStatus(Resource):
     def get(self):
         status = TestBackend()
-        return {'version': status[0], 'startup': status[1], 'get': status[2], 'set': status[3]}
+        return {
+            'version': status[0],
+            'startup': status[1],
+            'get': status[2],
+            'set': status[3],
+        }
 
 
 class AddSighting(Resource):
@@ -106,15 +131,18 @@ class AddSighting(Resource):
         payload = f'{source}:{request_type}:{org_uuid}'
         if r.hset(request.form['value'], when, payload):
             if journal:
-                now = datetime.datetime.utcnow()
-                year_month_day_format = '%Y%m%d'
-                log_day = now.strftime(year_month_day_format)
-                ns = time.time_ns()
-                r.zadd(log_day, {request.form['value']: ns})
+                UpdateJournal(value=request.form['value'])
             r.incr('misp-sighting-server:set')
             return True
         else:
-            return False
+            existing_payload = r.hget(request.form['value'], when)
+            updated_payload = f'{existing_payload}\n{payload}'
+            if UpdatePayload(
+                value=request.form['value'], when=when, new_payload=updated_payload
+            ):
+                UpdateJournal(value=request.form['value'])
+                r.incr('misp-sighting-server:set')
+                return True
 
 
 class GetSighting(Resource):
