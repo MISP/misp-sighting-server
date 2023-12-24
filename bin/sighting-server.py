@@ -34,13 +34,13 @@ api = Api(app)
 cfg = configparser.ConfigParser()
 cfg.read('../cfg/server.cfg')
 
-ardb_port = cfg.get('server', 'ardb_port')
+backend_port = cfg.get('server', 'backend_port')
 api_key = cfg.get('server', 'api_key')
 default_source = cfg.get('server', 'default_source')
 default_org_uuid = cfg.get('server', 'default_org_uuid')
 journal = cfg.get('server', 'journal')
 version = '0.2'
-r = redis.StrictRedis(port=ardb_port, db=0, decode_responses=True, charset='utf-8')
+r = redis.StrictRedis(port=backend_port, db=0, decode_responses=True, charset='utf-8')
 
 
 def _validate_uuid(value=None):
