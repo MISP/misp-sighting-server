@@ -1,6 +1,3 @@
-[submodule "back-end/ardb"]
-	path = back-end/ardb
-	url = https://github.com/yinqiwen/ardb.git
 [submodule "back-end/kvrocks"]
 	path = back-end/kvrocks
 	url = https://github.com/apache/incubator-kvrocks.git
